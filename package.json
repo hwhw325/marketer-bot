@@ -12,7 +12,8 @@
     "openai": "^4.94.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "recharts": "^2.15.3"
   },
   "devDependencies": {
     "@types/node": "22.14.1",

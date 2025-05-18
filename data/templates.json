@@ -1,0 +1,104 @@
+{
+    "추천 템플릿": [
+      {
+        "name": "한정판 프로모션",
+        "prompt": "Attention: 딱 이번 주만 만날 수 있는 한정판 제품! Interest: 특별한 혜택과 선물 패키지를 확인하세요. Desire: 단 한 번의 기회, 품절 전 서두르세요! Action: 지금 바로 구매하기."
+      },
+      {
+        "name": "시즌 이벤트",
+        "prompt": "Attention: 봄맞이 스프링 세일! Interest: 새학기맞이 최고의 가성비 아이템 모음. Desire: 놓치면 후회할 할인율, 지금 장바구니에 담아보세요! Action: 세일상품 보러가기."
+      }
+    ],
+    "카페": [
+    {
+      "name": "AIDA 프로모션",
+      "prompt": "Attention: 달콤한 커피 한 잔! Interest: 이달의 스페셜 블렌드를 소개합니다. Desire: 부드러운 풍미와 향긋한 아로마를 느껴보세요. Action: 지금 방문하고 할인 혜택을 누리세요!"
+    },
+    {
+      "name": "이벤트 알림",
+      "prompt": "이번 주말 한정! 해피 아워 이벤트를 놓치지 마세요. 친구와 함께 오시면 추가 음료 1잔 무료 🎉"
+    }
+  ],
+  "뷰티": [
+    {
+      "name": "신제품 런칭",
+      "prompt": "Introducing our new skincare line! 피부에 수분 가득, 매일 아침 빛나는 피부를 경험해보세요."
+    },
+    {
+      "name": "할인 프로모션",
+      "prompt": "Limited Time Offer: 전 제품 20% 할인! 당신의 아름다움을 한층 더 빛나게 하세요."
+    }
+  ],
+  "스마트 스토어 구매대행": [
+    {
+      "name": "핵심 혜택 강조",
+      "prompt": "Attention: 스마트 스토어 구매대행으로 쉽고 빠르게! Interest: 번거로운 해외 직구를 대행해드립니다. Desire: 최저가 보장과 빠른 배송을 경험해보세요. Action: 지금 바로 주문하세요!"
+    }
+  ],
+  "가전제품": [
+    {
+      "name": "한정 수량 세일",
+      "prompt": "Flash Sale: 최신 가전제품 30% 할인! 품절 전 서두르세요."
+    }
+  ],
+  "패션": [
+    {
+      "name": "트렌드 스타일",
+      "prompt": "Discover the latest fashion trends! 세련된 디자인으로 올 시즌 스타일을 완성하세요."
+    },
+    {
+      "name": "시즌 오프 세일",
+      "prompt": "Season Off Sale: 최대 50% 할인! 이 기회를 놓치지 마세요."
+    }
+  ],
+  "푸드": [
+    {
+      "name": "건강 식단 소개",
+      "prompt": "Introducing our healthy meal options! 신선한 재료로 균형 잡힌 식사를 즐겨보세요."
+    },
+    {
+      "name": "배달 프로모션",
+      "prompt": "Order now! 첫 주문 10% 할인 + 무료 배달 혜택을 받아보세요 🍔🚚"
+    }
+  ],
+  "여행": [
+    {
+      "name": "여행 패키지",
+      "prompt": "Explore our exclusive travel packages! 편안한 숙소와 특별한 체험이 기다리고 있습니다."
+    },
+    {
+      "name": "얼리버드 할인",
+      "prompt": "Early Bird Promotion: 여름 휴가 상품 15% 할인, 지금 예약하세요! 🏖️"
+    }
+  ],
+  "헬스/피트니스": [
+    {
+      "name": "멤버십 이벤트",
+      "prompt": "Boost your workout! 한 달 무료 체험 멤버십을 지금 신청하세요 💪"
+    }
+  ],
+  "교육": [
+    {
+      "name": "강의 등록",
+      "prompt": "Enroll in our new online course! 전문가 강사진과 함께 성장의 기회를 잡으세요."
+    }
+  ],
+  "부동산": [
+    {
+      "name": "오픈 하우스 초대",
+      "prompt": "You're invited! 이번 주말 오픈 하우스에서 새 집을 둘러보세요 🏡"
+    }
+  ],
+  "자동차": [
+    {
+      "name": "시승 이벤트",
+      "prompt": "Test Drive Event: 최신 모델 시승하고 특별 혜택 받아가세요! 🚗"
+    }
+  ],
+  "IT/테크": [
+    {
+      "name": "제품 출시",
+      "prompt": "Launch Alert: 혁신적인 신제품이 출시되었습니다. 지금 확인해보세요!"
+    }
+  ]
+}
