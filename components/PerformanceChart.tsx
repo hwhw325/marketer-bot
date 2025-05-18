@@ -26,7 +26,12 @@ export default function PerformanceChart({ entries }: PerformanceChartProps) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
         <YAxis unit="%" />
-        <Tooltip formatter={v => `${v.toFixed(1)}%`} />
+        <Tooltip
+          formatter={v => {
+            const num = Number(v);
+            return `${isNaN(num) ? 0 : num.toFixed(1)}%`;
+          }}
+        />
         <Line type="monotone" dataKey="ctr" stroke="#2563eb" />
       </LineChart>
 
