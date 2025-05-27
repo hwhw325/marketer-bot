@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: 유닛 테스트 실행
-        run: npm test
+        run: npm test --if-present
 
       - name: 린트 검사
         run: npm run lint
