@@ -20,7 +20,7 @@ jobs:
           node-version: 18
 
       - name: 의존성 설치
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: 유닛 테스트 실행
         run: npm test --if-present
