@@ -1,4 +1,7 @@
 /* styles/globals.css */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 /* ─── 1. 라이트 모드 변수 ─────────────────────────────────── */
 :root {
