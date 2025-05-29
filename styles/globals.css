@@ -1,18 +1,65 @@
 /* styles/globals.css */
 
-html,
-body {
-  padding: 0;
+/* ─── 1. 라이트 모드 변수 ─────────────────────────────────── */
+:root {
+  /* 헤더 */
+  --header-bg: #fff;
+  --header-text: #333;
+
+  /* 본문 기본 텍스트 */
+  --text-primary: #111;
+
+  /* 메인 페이지 배경 */
+  --main-bg-home: #eef4ff;      /* 홈 전용 연한 블루 계열 */
+  --main-bg-other: #f5f5f5;     /* 그 외 페이지 기본 회색 계열 */
+
+  /* 가이드·피드백 카드 */
+  --card-bg: #fff;
+  --link-color: #0066cc;
+  --accent: #d9822b;
+}
+
+/* ─── 2. 다크 모드 변수 ─────────────────────────────────── */
+.dark {
+  /* 헤더 */
+  --header-bg: #0f111a;
+  --header-text: #eee;
+
+  /* 본문 기본 텍스트 */
+  --text-primary: #eee;
+
+  /* 메인 페이지 배경 (다크) */
+  --main-bg-home: #1a1e2e;
+  --main-bg-other: #0a0a0a;
+
+  /* 가이드·피드백 카드 */
+  --card-bg: #1a1a2e;
+  --link-color: #4da6ff;
+  --accent: #ffc107;
+}
+
+/* ─── 3. 전역 리셋 및 본문 ───────────────────────────────── */
+html, body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  padding: 0;
+  /* 기본은 홈이 아닐 때 배경 (main-bg-other) */
+  background-color: var(--main-bg-other);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
-* {
-  box-sizing: border-box;
+/* 홈일 때만 background-color 덮어쓰기 */
+body.home {
+  background-color: var(--main-bg-home);
 }
 
-html.dark {
-  background-color: #1a1a1a;
-  color: #f5f5f5;
+/* ─── 4. 링크 & 기타 공통 ───────────────────────────────── */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
 }

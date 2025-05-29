@@ -1,0 +1,77 @@
+/* pages/guide.module.css */
+
+.container {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .heading {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+  }
+  
+  .steps {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .step {
+    position: relative;
+    padding: 1.5rem 1rem 1.5rem 3rem;
+    margin-bottom: 1rem;
+    background: var(--card-bg);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .stepHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+    color: var(--accent);
+  }
+  
+  .stepTitle {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  .stepDesc {
+    margin: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  
+  .tip {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+  
+  .back {
+    text-align: center;
+    margin-top: 2rem;
+  }
+  
+  .backLink {
+    color: var(--link-color);
+    font-weight: 500;
+  }
+  
+  .backLink:hover {
+    text-decoration: underline;
+  }
+  

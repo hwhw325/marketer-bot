@@ -1,21 +1,26 @@
 // components/TemplateSelector.tsx
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import templates from '../data/templates.json';
 import { baseButton, inputStyle } from '../lib/styles';
 
 interface TemplateSelectorProps {
-  onSelect: (prompt: string) => void;
+  selectedCategory: string;
+  onCategoryChange: (newCat: string) => void;
+  onSelect: (prompt: string, templateName: string) => void;
 }
 
-export default function TemplateSelector({ onSelect }: TemplateSelectorProps) {
+export default function TemplateSelector({
+  selectedCategory,
+  onCategoryChange,
+  onSelect,
+}: TemplateSelectorProps) {
   const categories = ['직접 입력', ...Object.keys(templates)];
-  const [cat, setCat] = useState(categories[0]);
 
   return (
     <div style={{ marginBottom: '1rem' }}>
       <select
-        value={cat}
-        onChange={e => setCat(e.target.value)}
+        value={selectedCategory}
+        onChange={e => onCategoryChange(e.target.value)}
         style={inputStyle}
       >
         {categories.map(c => (
@@ -23,12 +28,12 @@ export default function TemplateSelector({ onSelect }: TemplateSelectorProps) {
         ))}
       </select>
 
-      {cat !== '직접 입력' ? (
+      {selectedCategory !== '직접 입력' ? (
         <div style={{ marginTop: '0.5rem' }}>
-          {templates[cat].map((t: any) => (
+          {templates[selectedCategory]?.map((t: any) => (
             <button
               key={t.name}
-              onClick={() => onSelect(t.prompt)}
+              onClick={() => onSelect(t.prompt, selectedCategory)}
               style={{ ...baseButton, marginRight: '0.5rem', marginBottom: '0.5rem' }}
             >
               {t.name}

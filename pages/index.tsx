@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import templates from '../data/templates.json';
 import TemplateSelector from '../components/TemplateSelector';
 import OnboardingModal from '../components/OnboardingModal';
-
 const toneOptions = ['말랑한', '신뢰감', '재치있는', '고급스러운'];
 const emotionOptions = ['감성적인', '활기찬', '차분한', '발랄한'];
 const targetOptions = ['10대', '20대', '30대', '40대', '50대 이상'];
@@ -9,6 +9,7 @@ const genderOptions = ['여성', '남성', '모두'];
 const purposeOptions = ['상세페이지', '광고 배너', 'SNS 홍보', '슬로건'];
 interface HistoryItem {
 keyword: string;
+category: string;
 tone: string;
 emotion: string;
 target: string;
@@ -19,6 +20,10 @@ likes?: { liked: boolean; tag?: string }[];
 savedAt?: string;
 }
 export default function Home() {
+const [templateCat, setTemplateCat] = useState<string>('직접 입력');
+useEffect(() => {
+console.log('🏷️ [Home] templateCat →', templateCat);
+}, [templateCat]);
 const [tagFilter, setTagFilter] = useState('');
 const [editing, setEditing] = useState<{ histIdx: number; lineIdx: number } | null>(null);
 const [editText, setEditText] = useState('');
@@ -26,13 +31,13 @@ const likedRef = useRef<HTMLDivElement | null>(null);
 const scrollToLiked = () => {
 if (likedRef.current) {
 likedRef.current.scrollIntoView({ behavior: 'smooth' });
- }
+}
 };
-
 const [darkMode, setDarkMode] = useState(false);
 const [keyword, setKeyword] = useState('');
-const handleTemplateSelect = (prompt: string) => {
-  setKeyword(prompt);
+const handleTemplateSelect = (prompt: string, cat: string) => {
+setKeyword(prompt);
+setTemplateCat(cat);
 };
 const [tone, setTone] = useState(toneOptions[0]);
 const [emotion, setEmotion] = useState(emotionOptions[0]);
@@ -50,12 +55,11 @@ const [tutorialStep, setTutorialStep] = useState(0);
 const [showGuide, setShowGuide] = useState(true);
 const [editedLines, setEditedLines] = useState<{ histIdx: number; lineIdx: number }[]>([]);
 useEffect(() => {
-  if (!localStorage.getItem('seenTutorial')) {
-    setShowTutorial(true);
-    setTutorialStep(0);
-  }
+if (!localStorage.getItem('seenTutorial')) {
+setShowTutorial(true);
+setTutorialStep(0);
+}
 }, []);
-
 useEffect(() => {
 const saved = localStorage.getItem('marketing-history');
 if (saved) setHistory(JSON.parse(saved));
@@ -91,12 +95,10 @@ if (typeof window !== 'undefined') {
 setIsMobile(window.innerWidth <= 640);
 }
 }, []);
-
-
- const closeTutorial = () => {
-   localStorage.setItem('seenTutorial', 'true');
-   setShowTutorial(false);
- };
+const closeTutorial = () => {
+localStorage.setItem('seenTutorial', 'true');
+setShowTutorial(false);
+};
 const resultHighlightStyle: React.CSSProperties = {
 backgroundColor: darkMode ? '#1f2937' : '#f0f9ff',
 border: '1px solid #93c5fd',
@@ -203,7 +205,7 @@ typeof like === 'object'
 .reverse()
 )
 ).slice(0, 10);
-const likedLinesWithLocation = history.flatMap((item, histIdx) =>
+const likedLinesWithLocation = history.flatMap((item, histIdx) =>
 item.result
 .split('\n')
 .map((line, lineIdx) => {
@@ -219,9 +221,15 @@ return isVisible ? { line, histIdx, lineIdx } : null;
 })
 .filter(Boolean)
 );
-const filteredHistory = search
-? history.filter((item) => item.keyword.includes(search))
-: history;
+const filteredHistory = (() => {
+const q = search.trim().toLowerCase();
+if (!q) return history;
+return history.filter(item => {
+const keyMatch    = item.keyword.toLowerCase().includes(q);
+const resultMatch = item.result.toLowerCase().includes(q);
+return keyMatch || resultMatch;
+});
+})();
 const handleGenerate = async () => {
 if (!keyword.trim()) {
 setToast('⛔ 키워드를 입력해주세요!');
@@ -231,7 +239,6 @@ return;
 setLoading(true);
 setResult('');
 setToast('🧠 문구 생성 중이에요… 잠시만 기다려주세요!');
-
 const startTime = Date.now();
 const prompt = `브랜드 키워드: ${keyword}
 브랜드 스타일: ${tone}
@@ -257,6 +264,7 @@ setResult(lines.join('\n'));
 setToast('✨ 문구가 완성되었어요! 맘에 드는 게 있나요?');
 const newItem: HistoryItem = {
 keyword,
+category: templateCat,
 tone,
 emotion,
 target,
@@ -321,7 +329,10 @@ setEditing(null);
 setEditText('');
 };
 const handleHistoryClick = (item: HistoryItem) => {
+// 1) 저장된 카테고리·키워드 동기화
 setKeyword(item.keyword);
+setTemplateCat(item.category);
+// 2) 나머지 옵션들 동기화
 setTone(item.tone);
 setEmotion(item.emotion);
 setTarget(item.target);
@@ -401,18 +412,17 @@ link.click();
 setToast('💾 문구가 다운로드 되었어요!');
 setTimeout(() => setToast(''), 2000);
 };
-  return (
+return (
 <div style={baseStyle}>
-  {/* ─── 온보딩 모달 ──────────────────────────── */}
-  {showTutorial && (
-  <OnboardingModal
-    step={tutorialStep}
-    onNext={() => setTutorialStep((s) => Math.min(s + 1, 3))}
-    onPrev={() => setTutorialStep((s) => Math.max(s - 1, 0))}
-    onClose={closeTutorial}
-  />
+{/* ─── 온보딩 모달 ──────────────────────────── */}
+{showTutorial && (
+<OnboardingModal
+step={tutorialStep}
+onNext={() => setTutorialStep((s) => Math.min(s + 1, 3))}
+onPrev={() => setTutorialStep((s) => Math.max(s - 1, 0))}
+onClose={closeTutorial}
+/>
 )}
-  
 {toast && (
 <div
 style={{
@@ -502,7 +512,11 @@ fontWeight: 600,
 <div style={sectionBox}>
 <h2 style={titleStyle}>📌 키워드와 조건을 입력해주세요</h2>
 {/* 업종별 템플릿 선택 */}
-<TemplateSelector onSelect={handleTemplateSelect} />
+<TemplateSelector
+selectedCategory={templateCat}
+onCategoryChange={setTemplateCat}
+onSelect={handleTemplateSelect}
+/>
 <input
 value={keyword}
 onChange={(e) => setKeyword(e.target.value)}
@@ -595,6 +609,7 @@ else updated[0].likes[idx] = { liked: true, tag: '' };
 } else {
 const newItem: HistoryItem = {
 keyword,
+category: templateCat,
 tone,
 emotion,
 target,
@@ -661,7 +676,7 @@ marginBottom: '1rem',
 ❎ 태그 필터 초기화
 </button>
 )}
-{recentTags.length > 0 && (
+{recentTags.length > 0 && (
 <div style={{ marginBottom: '1rem' }}>
 <div style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: darkMode ? '#cbd5e1' : '#374151' }}>
 최근 사용한 태그
@@ -706,7 +721,7 @@ transition: 'all 0.2s ease',
 </div>
 </div>
 )}
-{likedLinesWithLocation.map(({ line, histIdx, lineIdx }, i) => {
+{likedLinesWithLocation.map(({ line, histIdx, lineIdx }, i) => {
 const item = history[histIdx];
 const date = item.savedAt ? new Date(item.savedAt).toLocaleDateString('ko-KR') : '';
 return (
@@ -765,7 +780,7 @@ onClick={() => handleLikeToggle(histIdx, lineIdx)}
 🔖 태그를 입력하면 나중에 쉽게 찾을 수 있어요!
 </div>
 )}
-{editedLines.some(e => e.histIdx === histIdx && e.lineIdx === lineIdx) && (
+{editedLines.some(e => e.histIdx === histIdx && e.lineIdx === lineIdx) && (
 <div style={{ fontSize: '0.75rem', color: '#f97316', marginTop: '0.25rem' }}>
 ✏️ 수정됨
 </div>
@@ -809,7 +824,7 @@ cursor: 'pointer',
 #{tag}
 </div>
 ))}
-</div>
+</div>
 )}
 {/* ✅ 태그 입력창 */}
 <input
@@ -843,7 +858,7 @@ fontSize: '0.85rem',
 backgroundColor: darkMode ? '#0f172a' : '#f9fafb',
 }}
 />
-{tagSuggestions.length > 0 && (
+{tagSuggestions.length > 0 && (
 <div style={{ marginTop: '0.25rem', marginBottom: '0.5rem' }}>
 <div style={{ fontSize: '0.75rem', marginBottom: '0.25rem', color: darkMode ? '#94a3b8' : '#6b7280' }}>
 🔍 추천 태그
@@ -882,7 +897,7 @@ cursor: 'pointer',
 </div>
 );
 })}
-<button
+<button
 onClick={downloadLikedLines}
 style={{
 ...baseButton,
@@ -929,7 +944,7 @@ style={{ ...baseButton, backgroundColor: '#ef4444', color: '#fff' }}
 📅 {new Date(item.savedAt).toLocaleDateString('ko-KR')} 저장됨
 </div>
 )}
-<div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem' }}>
+<div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem' }}>
 <button
 onClick={() => handleHistoryClick(item)}
 style={{
@@ -984,4 +999,4 @@ onClick={() => handleLikeToggle(hIdx, lIdx)}
 </div>
 );
 }
-
+
