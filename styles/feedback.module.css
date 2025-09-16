@@ -1,0 +1,182 @@
+/* styles/feedback.module.css */
+
+.page {
+  background-color: #f8fafc;
+  min-height: calc(100vh - 60px);  /* 🔧 기존보다 줄임 (원래는 100vh) */
+  display: flex;
+  align-items: flex-start;         /* 🔧 중앙에서 위쪽으로 정렬 */
+  justify-content: center;
+  padding: 3rem 1rem 5rem;         /* 🔧 상단 여백 줄이고 하단 넉넉 */
+}
+
+.card {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2.5rem;
+  max-width: 1480px;
+  width: 100%;
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.form label {
+  display: block;
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  background-color: #fff;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.textarea {
+  height: 190px;
+  resize: vertical;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+.button {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #2563eb;
+}
+
+.success {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #10b981;
+  line-height: 1.6;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.successActions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #2563eb;
+}
+
+/* ✅ 다크모드 대응 */
+:global(.dark) .page {
+  background-color: #0f172a; /* 딥 네이비 배경 */
+  color: #e2e8f0;
+}
+
+:global(.dark) .card {
+  background-color: #1e293b; /* 어두운 카드 배경 */
+  color: #f8fafc;
+  border: 1px solid #334155;
+}
+
+:global(.dark) .input,
+:global(.dark) .select,
+:global(.dark) .textarea {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #475569;
+}
+
+:global(.dark) .input::placeholder,
+:global(.dark) .textarea::placeholder {
+  color: #94a3b8;
+}
+
+:global(.dark) .form label span {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+:global(.dark) .required {
+  color: #f87171;
+}
+
+:global(.dark) .button {
+  background-color: #3b82f6;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+:global(.dark) .button:hover {
+  background-color: #2563eb;
+}
+
+:global(.dark) .error {
+  color: #f87171;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+:global(.dark) .success {
+  color: #34d399;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 2rem 0;
+}

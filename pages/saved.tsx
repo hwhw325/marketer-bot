@@ -1,7 +1,11 @@
 // pages/saved.tsx
+import { useContext } from 'react';
 import Layout from '../components/Layout';
+import { UIContext } from './_app';
 
 export default function SavedPage() {
+  const ui = useContext(UIContext);
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6">

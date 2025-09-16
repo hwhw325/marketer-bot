@@ -1,103 +1,111 @@
 /* components/Header.module.css */
-
-/* ─── 1. 헤더 전체 ───────────────────────────────────────── */
 .header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1rem;
-    height: 64px;
-    background: var(--header-bg);
-    transition: background 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* 좌우 패딩을 CSS 변수로 제어 */
+  padding-left: var(--pad-left, 2rem);
+  padding-right: var(--pad-right, 2rem);
+  height: var(--header-h, 96px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+/* 다크모드 */
+.header.dark {
+  background-color: #0f172a;
+  color: #f1f5f9;
+  border-bottom: 1px solid #1e293b;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+/* ← 이 컨테이너 크기(가로/세로)로 로고가 정해집니다 */
+.logoBox {
+  position: relative;
+  width: var(--logo-w, 240px);
+  height: var(--logo-h, 56px);
+}
+
+/* fill 이미지가 박스 안에서 비율 유지 */
+.logoImg {
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .header { height: var(--m-header-h, 64px); }
+  .logoBox {
+    width: var(--m-logo-w, 160px);
+    height: var(--m-logo-h, 36px);
   }
-  
-  /* ─── 2. 로고 ───────────────────────────────────────────────── */
-  .logo {
-    display: flex;
-    align-items: center;
-  }
-  .logoImage {
-    height: 80px;      /* 로고 높이 조절 */
-    width: auto;
-    object-fit: contain;
-  
-    /* 여기서 로고를 아래로 내립니다 */
-    margin-top: 4px;   /* 값을 조정해 보세요 */
-  }
-  
-  /* ─── 3. 햄버거 버튼 ─────────────────────────────────────── */
-  .menuButton {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    color: inherit;    /* 바 색상도 currentColor */
-  }
-  .menuButton:focus {
-    outline: 2px solid #888;
-  }
-  .bar {
-    width: 24px;
-    height: 2px;
-    background: currentColor;
-    border-radius: 1px;
-  }
-  
-  /* ─── 4. 드롭다운 메뉴 컨테이너 ───────────────────────────── */
-  .menu {
-    position: absolute;
-    right: 1rem;
-    top: 64px;
-    background: var(--header-bg);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  /* ─── 5. 메뉴 리스트 & 아이템 ───────────────────────────── */
-  .menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0.5rem 0;
-  }
-  .menu li + li {
-    margin-top: 0.25rem;
-  }
-  .menu a {
-    display: block;
-    padding: 0.5rem 1rem;
-    white-space: nowrap;
-    color: #333;         /* 라이트 모드 텍스트 컬러 */
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-  .menu a:hover {
-    background: #f0f0f0;
-  }
-  
-  /* ─── 6. 다크 모드 전역 덮어쓰기 ──────────────────────────── */
-  /* CSS Modules 안에서 :global(.dark) 를 이용해 전역 .dark 클래스를 감지합니다. */
-  :global(.dark) .header {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-  :global(.dark) .bar {
-    background: currentColor;
-  }
-  :global(.dark) .menu {
-    background: var(--header-bg);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  }
-  :global(.dark) .menu a {
-    color: #eee;         /* 다크 모드 텍스트 컬러 */
-  }
-  :global(.dark) .menu a:hover {
-    background: #2a2a3c;
-  }
-  
+}
+
+.userMenu { position: relative; z-index: 1000; }
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menuItem { font-weight: 500; color: #374151; cursor: pointer; text-decoration: none; }
+.menuItem:hover { color: #10b981; }
+
+.proMenu {
+  font-weight: 600;
+  color: #10b981;
+  background-color: #ecfdf5;
+  border-radius: 9999px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+.proMenu:hover { background-color: #d1fae5; }
+
+.toggle {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--header-text);  /* ✅ 헤더용 텍스트 변수로 교체 */
+  transition: color 0.2s ease;
+}
+
+.toggle:hover {
+  color: var(--link-color);   /* ✅ 링크 색 변수 사용 */
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  z-index: 1100;
+}
+.dropdown a,
+.dropdown button {
+  padding: 0.5rem 1.5rem;
+  text-align: left;
+  text-decoration: none;
+  color: #374151;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.dropdown a:hover,
+.dropdown button:hover { background: #f3f4f6; }
+
+.dark { background-color: #1e293b; color: #f1f5f9; }

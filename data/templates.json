@@ -1,18 +1,20 @@
 {
-    "추천 템플릿": [
-      {
-        "name": "한정판 프로모션",
-        "prompt": "Attention: 딱 이번 주만 만날 수 있는 한정판 제품! Interest: 특별한 혜택과 선물 패키지를 확인하세요. Desire: 단 한 번의 기회, 품절 전 서두르세요! Action: 지금 바로 구매하기."
-      },
-      {
-        "name": "시즌 이벤트",
-        "prompt": "Attention: 봄맞이 스프링 세일! Interest: 새학기맞이 최고의 가성비 아이템 모음. Desire: 놓치면 후회할 할인율, 지금 장바구니에 담아보세요! Action: 세일상품 보러가기."
-      }
-    ],
-    "카페": [
+  "추천 템플릿": [
+    {
+      "name": "한정판 프로모션",
+      "prompt": "Attention: 딱 이번 주만 만날 수 있는 한정판 제품! Interest: 특별한 혜택과 선물 패키지를 확인하세요. Desire: 단 한 번의 기회, 품절 전 서두르세요! Action: 지금 바로 구매하기.",
+      "proOnly": true
+    },
+    {
+      "name": "시즌 이벤트",
+      "prompt": "Attention: 봄맞이 스프링 세일! Interest: 새학기맞이 최고의 가성비 아이템 모음. Desire: 놓치면 후회할 할인율, 지금 장바구니에 담아보세요! Action: 세일상품 보러가기."
+    }
+  ],
+  "카페": [
     {
       "name": "AIDA 프로모션",
-      "prompt": "Attention: 달콤한 커피 한 잔! Interest: 이달의 스페셜 블렌드를 소개합니다. Desire: 부드러운 풍미와 향긋한 아로마를 느껴보세요. Action: 지금 방문하고 할인 혜택을 누리세요!"
+      "prompt": "Attention: 달콤한 커피 한 잔! Interest: 이달의 스페셜 블렌드를 소개합니다. Desire: 부드러운 풍미와 향긋한 아로마를 느껴보세요. Action: 지금 방문하고 할인 혜택을 누리세요!",
+      "proOnly": true
     },
     {
       "name": "이벤트 알림",
@@ -26,7 +28,8 @@
     },
     {
       "name": "할인 프로모션",
-      "prompt": "Limited Time Offer: 전 제품 20% 할인! 당신의 아름다움을 한층 더 빛나게 하세요."
+      "prompt": "Limited Time Offer: 전 제품 20% 할인! 당신의 아름다움을 한층 더 빛나게 하세요.",
+      "proOnly": true
     }
   ],
   "스마트 스토어 구매대행": [
@@ -48,7 +51,8 @@
     },
     {
       "name": "시즌 오프 세일",
-      "prompt": "Season Off Sale: 최대 50% 할인! 이 기회를 놓치지 마세요."
+      "prompt": "Season Off Sale: 최대 50% 할인! 이 기회를 놓치지 마세요.",
+      "proOnly": true
     }
   ],
   "푸드": [
@@ -68,7 +72,8 @@
     },
     {
       "name": "얼리버드 할인",
-      "prompt": "Early Bird Promotion: 여름 휴가 상품 15% 할인, 지금 예약하세요! 🏖️"
+      "prompt": "Early Bird Promotion: 여름 휴가 상품 15% 할인, 지금 예약하세요! 🏖️",
+      "proOnly": true
     }
   ],
   "헬스/피트니스": [

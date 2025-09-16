@@ -1,0 +1,19 @@
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /api/*
+Disallow: /auth/*
+Disallow: /dashboard
+Disallow: /mypage
+Disallow: /saved
+Disallow: /settings/*
+Disallow: /login
+
+# Host
+Host: https://copyquick.co.kr
+
+# Sitemaps
+Sitemap: https://copyquick.co.kr/sitemap.xml
