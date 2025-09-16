@@ -1,19 +1,19 @@
-# 환경 변수
+# ───────────────── Env (비밀 커밋 금지: 템플릿만 허용) ─────────────────
 .env
 .env.local
 .env.*.local
+!.env.example
 
-# Next.js 빌드 캐시 무시
+# ───────────────── Node / Next / Vercel 산출물 ─────────────────
+node_modules/
 .next/
-node_modules
+.next/cache/
+out/
+dist/
+.vercel/
+.turbo/
 
-/lib/generated/prisma
-
-# ---- ENV (값 있는 파일은 전부 무시, 템플릿만 허용) ----
-.env*
-!.env.example            # ← 값 비어있는 템플릿만 커밋 허용
-
-# ---- Logs / dumps ----
+# ───────────────── Logs / dumps ─────────────────
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -21,27 +21,23 @@ yarn-error.log*
 pnpm-debug.log*
 dump*.sql
 
-# ---- System / tools ----
+# ───────────────── System / Editor ─────────────────
 .DS_Store
-.vercel
-.turbo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 
-# ---- Next.js / build ----
-out/
-dist/
-.next/cache/
-
-# ---- Prisma (db 파일은 무시, migrations는 커밋) ----
+# ───────────────── Prisma ─────────────────
+# 스키마/마이그레이션은 반드시 커밋. 로컬 DB 파일만 무시.
 *.db
 *.db-journal
 prisma/*.db
 prisma/*.db-journal
-# prisma/migrations/**  (커밋해야 함! ignore 금지)
+!prisma/schema.prisma
+!prisma/migrations/**
 
-# ---- Coverage / test ----
+# ───────────────── Coverage / Tests ─────────────────
 coverage/
 
-# ---- Local editor ----
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+# ───────────────── Generated code (옵션) ─────────────────
+/lib/generated/prisma/
