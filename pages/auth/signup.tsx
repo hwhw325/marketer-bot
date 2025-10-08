@@ -10,17 +10,19 @@ export default function SignUp() {
   const router = useRouter()
 
   const [email, setEmail] = useState("")
-  const [confirmAge, setConfirmAge] = useState(false)       // ✅ 만 14세 이상 확인(필수)
-  const [agreeTerms, setAgreeTerms] = useState(false)       // (필수) 이용약관
-  const [agreePrivacy, setAgreePrivacy] = useState(false)   // (필수) 개인정보처리방침
+  const [confirmAge, setConfirmAge] = useState(false)         // ✅ (필수) 만 14세 이상
+  const [agreeTerms, setAgreeTerms] = useState(false)         // ✅ (필수) 이용약관
+  const [agreePrivacy, setAgreePrivacy] = useState(false)     // ✅ (필수) 개인정보처리방침
   const [agreeMarketing, setAgreeMarketing] = useState(false) // (선택) 마케팅 수신
   const [loading, setLoading] = useState(false)
 
-  // 이미 동의한 사용자가 /auth/signup에 들어왔을 때 우회
+  // 이미 동의 완료한 사용자가 /auth/signup에 들어왔을 때 우회
   useEffect(() => {
     if (status !== "authenticated") return
-    const t = (session?.user as any)?.termsAcceptedAt
-    if (t) {
+    const u: any = session?.user || {}
+    const tOk = !!u?.termsAcceptedAt
+    const ageOk = !!u?.ageConfirmed
+    if (tOk && ageOk) {
       const cb = (router.query.callbackUrl as string) || "/"
       router.replace(cb)
     }
@@ -31,8 +33,11 @@ export default function SignUp() {
     if (!session?.user?.id) return
     const pending = sessionStorage.getItem("cq_pending_consent")
     if (!pending) return
-
-    const parsed = JSON.parse(pending) as { accepted: boolean; marketingConsent: boolean }
+    const parsed = JSON.parse(pending) as {
+      accepted: boolean
+      marketingConsent: boolean
+      ageConfirmed: boolean
+    }
     void saveAndFinalize(parsed.marketingConsent, parsed.accepted, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id])
@@ -40,22 +45,27 @@ export default function SignUp() {
   async function saveAndFinalize(marketing: boolean, accepted: boolean, fromPending = false) {
     try {
       setLoading(true)
-      // 1) DB 저장 (서버에서 14세 이상 여부는 accepted에 포함된 필수 동의로 해석)
+      // 1) DB 저장: 필수 동의(accepted) + 만14세(ageConfirmed) + 선택 마케팅
       const res = await fetch("/api/user/consent", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ marketingConsent: marketing, accepted }),
+        body: JSON.stringify({
+          marketingConsent: marketing,
+          accepted,
+          ageConfirmed: true,
+        }),
       })
       if (!res.ok) throw new Error("consent-failed")
 
       // 2) 보관값 정리
       if (fromPending) sessionStorage.removeItem("cq_pending_consent")
 
-      // 3) 세션 토큰 즉시 갱신
+      // 3) 세션 토큰 즉시 갱신 → middleware 통과
       await update({
         user: {
           termsAcceptedAt: new Date().toISOString(),
           marketingConsent: marketing,
+          ageConfirmed: true,
         } as any,
       })
 
@@ -64,7 +74,8 @@ export default function SignUp() {
       router.replace(cb)
     } catch (e) {
       console.error(e)
-      alert("동의 저장에 실패했어요. 잠시 후 다시 시도해 주세요.")
+      alert("동의 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    } finally {
       setLoading(false)
     }
   }
@@ -87,7 +98,11 @@ export default function SignUp() {
     // 미로그인: 동의값 임시 저장 후 이메일 로그인 진행(매직 링크)
     sessionStorage.setItem(
       "cq_pending_consent",
-      JSON.stringify({ accepted: true, marketingConsent: agreeMarketing })
+      JSON.stringify({
+        accepted: true,
+        marketingConsent: agreeMarketing,
+        ageConfirmed: true,
+      })
     )
 
     try {
@@ -192,7 +207,9 @@ export default function SignUp() {
                     </label>
                     <input
                       id="email"
+                      name="email"
                       type="email"
+                      autoComplete="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -211,8 +228,10 @@ export default function SignUp() {
                   <legend className="sr-only">필수/선택 동의</legend>
 
                   {/* ✅ (필수) 만 14세 이상 */}
-                  <label className="flex items-start gap-3">
+                  <label htmlFor="confirmAge" className="flex items-start gap-3">   {/* ★ htmlFor */}
                     <input
+                      id="confirmAge"
+                      name="confirmAge"
                       type="checkbox"
                       checked={confirmAge}
                       onChange={() => setConfirmAge(!confirmAge)}
@@ -228,8 +247,10 @@ export default function SignUp() {
                     </span>
                   </label>
 
-                  <label className="flex items-start gap-3">
+                  <label htmlFor="agreeTerms" className="flex items-start gap-3">
                     <input
+                      id="agreeTerms"
+                      name="agreeTerms"
                       type="checkbox"
                       checked={agreeTerms}
                       onChange={() => setAgreeTerms(!agreeTerms)}
@@ -241,8 +262,10 @@ export default function SignUp() {
                     </span>
                   </label>
 
-                  <label className="flex items-start gap-3">
+                  <label htmlFor="agreePrivacy" className="flex items-start gap-3">
                     <input
+                      id="agreePrivacy"
+                      name="agreePrivacy"
                       type="checkbox"
                       checked={agreePrivacy}
                       onChange={() => setAgreePrivacy(!agreePrivacy)}
@@ -254,8 +277,10 @@ export default function SignUp() {
                     </span>
                   </label>
 
-                  <label className="flex items-start gap-3">
+                  <label htmlFor="agreeMarketing" className="flex items-start gap-3">
                     <input
+                      id="agreeMarketing"        // ★
+                      name="agreeMarketing"
                       type="checkbox"
                       checked={agreeMarketing}
                       onChange={() => setAgreeMarketing(!agreeMarketing)}

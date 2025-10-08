@@ -1223,6 +1223,8 @@ cursor: 'pointer',
 
 
 <input
+id="landingKeyword"
+name="keyword"
 value={keyword}
 onChange={(e) => setKeyword(e.target.value)}
 style={inputStyle}
@@ -1907,8 +1909,16 @@ cursor: 'pointer',
 {/* 🕘 지난 기록 */}
 <div style={sectionBox}>
 <h2 style={titleStyle}>🕘 지난 기록도 있어요</h2>
+
+  {/* 시각적으로 숨긴 라벨(선택) */}
+  <label htmlFor="historySearch" style={{ position:'absolute', width:1, height:1, overflow:'hidden', clip:'rect(0 0 0 0)' }}>
+    기록 검색
+  </label>
+
 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
 <input
+id="historySearch"
+name="historyQuery"
 placeholder="키워드로 검색"
 value={search}
 onChange={(e) => setSearch(e.target.value)}

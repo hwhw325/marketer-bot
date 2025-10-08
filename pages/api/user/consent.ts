@@ -4,6 +4,14 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]"
 import prisma from "../../../lib/prisma"
 
+type Body = {
+  // 필수 동의
+  accepted?: boolean // 약관/개인정보 동의 묶음 (필수)
+  ageConfirmed?: boolean // 만 14세 이상 확인 (필수)
+  // 선택 동의
+  marketingConsent?: boolean
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "PATCH") {
     res.setHeader("Allow", "PATCH")
@@ -16,17 +24,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { marketingConsent, accepted } = (req.body ?? {}) as {
-      marketingConsent?: boolean
-      accepted?: boolean
-    }
+    const { accepted, ageConfirmed, marketingConsent } = (req.body ?? {}) as Body
 
-    // 필수 동의(약관/개인정보)는 반드시 true여야 저장 진행
+    // ── 필수 동의 검사 ───────────────────────────────────────────
     if (accepted !== true) {
       return res.status(400).json({ ok: false, message: "약관/개인정보 필수 동의가 필요합니다." })
     }
+    if (ageConfirmed !== true) {
+      return res.status(400).json({ ok: false, message: "만 14세 이상만 가입할 수 있습니다." })
+    }
 
-    const data: Record<string, any> = { termsAcceptedAt: new Date() }
+    // ── 저장 데이터 구성 ─────────────────────────────────────────
+    const data: Record<string, any> = {
+      termsAcceptedAt: new Date(),
+      ageConfirmed: true,
+    }
     if (typeof marketingConsent === "boolean") {
       data.marketingConsent = marketingConsent
     }
@@ -36,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data,
     })
 
-    // 클라이언트에선 next-auth의 session.update()로 JWT를 즉시 갱신하도록 설계됨
+    // 클라이언트에서 next-auth의 session.update()로 JWT 즉시 갱신하게 설계
     return res.status(200).json({ ok: true })
   } catch (e) {
     console.error("consent API error:", e)

@@ -110,12 +110,14 @@ export async function middleware(req: NextRequest) {
   }
 
   // G) (옵션) 최초 약관 동의 요구: JWT에 termsAcceptedAt을 넣어둔 경우만 사용
-  if (!(token as any).termsAcceptedAt && !pathname.startsWith("/auth/signup")) {
-    const url = req.nextUrl.clone()
-    url.pathname = "/auth/signup"
-    url.searchParams.set("callbackUrl", pathname + search)
-    return NextResponse.redirect(url)
-  }
+  const lacksTerms = !(token as any).termsAcceptedAt
+  const lacksAge = !(token as any).ageConfirmed
+  if ((lacksTerms || lacksAge) && !pathname.startsWith("/auth/signup")) {
+   const url = req.nextUrl.clone()
+   url.pathname = "/auth/signup"
+   url.searchParams.set("callbackUrl", pathname + search)
+   return NextResponse.redirect(url)
+}
 
   // H) 통과
   return NextResponse.next()

@@ -9,7 +9,7 @@ import styles from './Header.module.css'
 export default function Header({ darkMode }: { darkMode: boolean }) {
   const router = useRouter()
   const isHome = router.pathname === '/'                // 홈에서만
-  const imgPriority = isHome && process.env.NODE_ENV === 'production' // 프로덕션에서만
+  const imgPriority = isHome  // 홈에서만 우선 로드(유지)
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -81,8 +81,9 @@ export default function Header({ darkMode }: { darkMode: boolean }) {
               alt="CopyQuick"
               fill
               className={styles.logoImg}
-              sizes="(max-width: 640px) 160px, 260px"
+              sizes="(max-width: 640px) 160px, 220px"  // 실제 DESKTOP_LOGO_W와 일치
               priority={imgPriority}
+              fetchPriority={imgPriority ? "high" : undefined} // (선택) 크롬 힌트
             />
           </div>
         </Link>

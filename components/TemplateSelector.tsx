@@ -26,11 +26,15 @@ export default function TemplateSelector({
     <div style={{ marginBottom: '1rem' }}>
       {/* 드롭다운 */}
       <select
+        id="landingTemplate"
+        name="template"
         value={selectedCategory}
         onChange={e => onCategoryChange(e.target.value)}
         style={inputStyle}
       >
-        {categories.map(c => (
+        {/* 첫 옵션이 안내문이라면 disabled로 */}
+        <option value="" disabled>템플릿 선택</option>
+        {categories.map((c) => (
           <option key={c} value={c}>
             {c}
           </option>
