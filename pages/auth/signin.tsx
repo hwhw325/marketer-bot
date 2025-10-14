@@ -1,47 +1,52 @@
 // pages/auth/signin.tsx
-import { GetServerSideProps } from "next"
+import Head from "next/head"
+import Link from "next/link"
+import { useRouter } from "next/router"
+import React, { useEffect, useState, FormEvent } from "react"
+import type { GetServerSideProps } from "next"
 import {
   getProviders,
+  getCsrfToken,
   signIn,
   LiteralUnion,
   ClientSafeProvider,
 } from "next-auth/react"
-import { BuiltInProviderType } from "next-auth/providers"
-import React, { useEffect, useState, FormEvent } from "react"
-import { useRouter } from "next/router"
-import Link from "next/link"
+import type { BuiltInProviderType } from "next-auth/providers"
 
+// ---- 타입 ----
+type ProvidersMap = Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider>
 type Props = {
-  providers: Record<LiteralUnion<BuiltInProviderType, string>, ClientSafeProvider> | null
+  providers: ProvidersMap | null
+  csrfToken: string | null
 }
 type UIState = "idle" | "sending" | "sent" | "error"
 
-// ✅ 도움말 문구를 데이터로 분리(하드코딩 블록 제거)
+// ✅ 도움말 문구는 데이터로 분리(하드코딩 블록 최소화)
 const HELP_ITEMS: string[] = [
   "스팸함 / 프로모션 탭을 확인해 주세요.",
   "이메일 주소에 오타가 없는지 다시 확인해 주세요.",
   "회사 메일이라면 외부 수신 차단 여부를 확인해 주세요.",
-  "메일이 도착하는 데 1–2분(간혹 최대 5분) 걸릴 수 있어요. 잠시 기다렸다가 “다시 보내기”를 눌러 보세요.",
+  "메일이 도착하는 데 1–2분(간혹 최대 5분) 걸릴 수 있어요.",
   "보낸 사람을 주소록에 추가하고 스팸 해제해 두면 이후 더 안정적으로 도착해요.",
 ]
 
-export default function SignIn({ providers }: Props) {
+export default function SignIn({ providers: ssrProviders, csrfToken }: Props) {
   const router = useRouter()
+  const [providers, setProviders] = useState<ProvidersMap | null>(ssrProviders)
+  const [csrf, setCsrf] = useState<string | null>(csrfToken)
+
   const [email, setEmail] = useState("")
   const [ui, setUi] = useState<UIState>("idle")
   const [errMsg, setErrMsg] = useState<string | null>(null)
   const [cooldown, setCooldown] = useState(0)
-  const [hasSent, setHasSent] = useState(false) // ✅ 전송 성공 이후 화면 유지용
-
-  // 도움말 접기/펼치기 상태 (기본 접힘)
+  const [hasSent, setHasSent] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
-  // callbackUrl 한 번 계산해 재사용
   const q = router.query.callbackUrl
   const callbackUrl = (Array.isArray(q) ? q[0] : q) || "/"
-
   const isSending = ui === "sending"
   const isCooldown = cooldown > 0
+  const showSuccess = hasSent
 
   // ⏱ 재전송 타이머
   useEffect(() => {
@@ -50,7 +55,7 @@ export default function SignIn({ providers }: Props) {
     return () => clearInterval(id)
   }, [cooldown])
 
-  // 🔁 돌아왔을 때 sent=1이면 성공 패널 유지 + 마지막 이메일 복원
+  // 🔁 인증 후 돌아온 경우 sent=1 → 성공 패널 유지 + 마지막 이메일 복원
   useEffect(() => {
     if (router.query.sent === "1") {
       setHasSent(true)
@@ -62,7 +67,7 @@ export default function SignIn({ providers }: Props) {
     }
   }, [router.query.sent])
 
-  // ⏳ 클라이언트 진입 시 남은 쿨다운 복원
+  // ⏳ 남은 쿨다운 복원
   useEffect(() => {
     try {
       const raw = localStorage.getItem("cq_cooldown_until")
@@ -72,18 +77,18 @@ export default function SignIn({ providers }: Props) {
     } catch {}
   }, [])
 
-  // 🔎 해시가 #help면 즉시 도움말 열고 스크롤
+  // 🔎 #help로 진입 시 도움말 열기
   useEffect(() => {
     if (typeof window === "undefined") return
     if (window.location.hash === "#help") {
       setHelpOpen(true)
       setTimeout(() => {
-        document.getElementById("help")?.scrollIntoView({ behavior: "smooth", block: "start" })
+        document.getElementById("signin-help")?.scrollIntoView({ behavior: "smooth", block: "start" })
       }, 0)
     }
   }, [router.asPath])
 
-  // ?error= → 사람친화 메시지 + URL 정리(에러만 제거, 다른 쿼리는 유지)
+  // ?error= → 사람친화 메시지 + URL 정리
   useEffect(() => {
     const qsErr = router.query.error as string | undefined
     if (!qsErr) return
@@ -99,6 +104,27 @@ export default function SignIn({ providers }: Props) {
     const { error, ...rest } = router.query
     router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true })
   }, [router.query.error, router])
+
+  // 🛡️ SSR이 비어 있는 드문 경우(프리뷰 캐시 등) → 클라이언트에서 보강
+  useEffect(() => {
+    ;(async () => {
+      if (!providers || Object.keys(providers).length === 0) {
+        try {
+          const p = await getProviders()
+          if (p && Object.keys(p).length > 0) setProviders(p as ProvidersMap)
+        } catch (e) {
+          console.warn("[signin] getProviders() failed on client", e)
+        }
+      }
+      if (!csrf) {
+        try {
+          // getCsrfToken은 ctx 필요 없이 클라에서도 동작
+          const token = await getCsrfToken()
+          if (token) setCsrf(token)
+        } catch {}
+      }
+    })()
+  }, [providers, csrf])
 
   // 최초 전송
   const handleEmailSignIn = async (e: FormEvent) => {
@@ -120,7 +146,7 @@ export default function SignIn({ providers }: Props) {
           const until = Date.now() + 30_000
           localStorage.setItem("cq_cooldown_until", String(until))
         } catch {}
-        setHasSent(true)       // ✅ 성공 화면 유지
+        setHasSent(true)
         setUi("sent")
         setCooldown(30)
       } else {
@@ -139,7 +165,7 @@ export default function SignIn({ providers }: Props) {
     if (isCooldown || isSending || !email) return
     setErrMsg(null)
     try {
-      setUi("sending") // hasSent=true라 성공 패널 유지됨
+      setUi("sending")
       const res = await signIn("email", { email, redirect: false, callbackUrl })
       if (res?.ok) {
         try {
@@ -168,7 +194,7 @@ export default function SignIn({ providers }: Props) {
     router.push(`/auth/verify-request?${qs.toString()}`)
   }
 
-  // “다른 이메일로 받기” → sent 쿼리 제거 + 상태 초기화 + 쿨다운 초기화
+  // “다른 이메일로 받기” → sent 쿼리 제거 + 상태 초기화
   const backToIdle = () => {
     const { sent, ...rest } = router.query
     router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true })
@@ -178,10 +204,14 @@ export default function SignIn({ providers }: Props) {
     try { localStorage.removeItem("cq_cooldown_until") } catch {}
   }
 
-  const showSuccess = hasSent // ✅ 전송 이후에는 계속 성공 패널 렌더
+  const hasAnyProvider = !!providers && Object.keys(providers).length > 0
 
   return (
     <>
+      <Head>
+        <title>로그인 | CopyQuick</title>
+      </Head>
+
       <div style={styles.page}>
         <div style={styles.card}>
           {ui === "error" && errMsg && (
@@ -233,9 +263,14 @@ export default function SignIn({ providers }: Props) {
             </div>
           ) : (
             <>
+              {/* Email 로그인 */}
               {providers?.email && (
                 <form onSubmit={handleEmailSignIn} style={styles.form}>
+                  {/* 클라 전송 방식이라 CSRF hidden은 필수는 아니지만, 서버 폼 전송 대비해 주입 */}
+                  <input type="hidden" name="csrfToken" value={csrf ?? ""} />
                   <input
+                    id="signinEmail"
+                    name="email"
                     type="email"
                     required
                     placeholder="you@example.com"
@@ -243,6 +278,7 @@ export default function SignIn({ providers }: Props) {
                     onChange={(e) => setEmail(e.target.value)}
                     style={styles.input}
                     aria-label="이메일 주소"
+                    autoComplete="email"
                   />
                   <button type="submit" style={styles.primaryButton} disabled={isSending} aria-disabled={isSending}>
                     {isSending ? "전송 중…" : "로그인 링크 전송"}
@@ -250,7 +286,8 @@ export default function SignIn({ providers }: Props) {
                 </form>
               )}
 
-              {providers && (
+              {/* 구분선 */}
+              {hasAnyProvider && (
                 <div style={styles.dividerContainer}>
                   <div style={styles.line} />
                   <span style={styles.orText}>또는</span>
@@ -258,6 +295,7 @@ export default function SignIn({ providers }: Props) {
                 </div>
               )}
 
+              {/* OAuth(예: GitHub) */}
               {providers &&
                 Object.values(providers)
                   .filter((p) => p.id !== "email")
@@ -273,6 +311,16 @@ export default function SignIn({ providers }: Props) {
                       {p.name}로 계속하기
                     </button>
                   ))}
+
+              {/* providers 자체가 비거나 0개일 때 안내(원인 지침) */}
+              {!hasAnyProvider && (
+                <div className="rounded-md" style={{ marginTop: "1rem", background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", padding: "0.75rem 1rem", fontSize: ".9rem" }}>
+                  현재 환경에서 사용 가능한 로그인 방식이 없습니다.
+                  <br />
+                  관리자: Preview의 <code>GITHUB_CLIENT_ID/SECRET</code> + <code>GITHUB_ALLOW_PREVIEW=true</code> 또는
+                  SMTP <code>EMAIL_SERVER_*</code> 세트를 확인해 주세요.
+                </div>
+              )}
 
               <div style={styles.legalNotice}>
                 계속하면{" "}
@@ -290,7 +338,7 @@ export default function SignIn({ providers }: Props) {
           </p>
 
           {/* ✅ 도움 섹션(접기/펼치기) */}
-          <div id="help" style={styles.helpWrap}>
+          <div style={styles.helpWrap}>
             <button
               type="button"
               onClick={() => setHelpOpen(v => !v)}
@@ -315,7 +363,7 @@ export default function SignIn({ providers }: Props) {
               id="signin-help"
               style={{
                 ...styles.helpPanel,
-                maxHeight: helpOpen ? 600 : 0, // 내용 높이에 맞게 조절
+                maxHeight: helpOpen ? 600 : 0,
                 borderColor: helpOpen ? "#e2e8f0" : "transparent",
               }}
             >
@@ -330,11 +378,11 @@ export default function SignIn({ providers }: Props) {
             </div>
           </div>
 
-          <p style={styles.footnote}>© 2025 CopyQuick. All rights reserved.</p>
+          <p style={styles.footnote}>© {new Date().getFullYear()} CopyQuick. All rights reserved.</p>
         </div>
       </div>
 
-      {/* 기존 애니메이션 유지 */}
+      {/* 모션 */}
       <style jsx>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
@@ -343,11 +391,21 @@ export default function SignIn({ providers }: Props) {
   )
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const providers = await getProviders()
-  return { props: { providers: providers ?? null } }
+// ---- SSR: providers + csrfToken 주입, 캐시 방지 ----
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+  try {
+    const [providers, csrfToken] = await Promise.all([
+      getProviders().catch(() => null),
+      getCsrfToken(ctx).catch(() => null),
+    ])
+    ctx.res.setHeader("Cache-Control", "no-store, max-age=0")
+    return { props: { providers: (providers as ProvidersMap) ?? null, csrfToken: csrfToken ?? null } }
+  } catch {
+    return { props: { providers: null, csrfToken: null } }
+  }
 }
 
+// ---- 스타일 ----
 const styles: Record<string, React.CSSProperties> = {
   page: { display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f0f4f8", padding: "1rem" },
   card: {
@@ -421,5 +479,4 @@ const styles: Record<string, React.CSSProperties> = {
   helpInner: { padding: "1rem 1.25rem", textAlign: "left" },
   helpTitle: { margin: 0, fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" },
   helpList: { marginTop: ".5rem", paddingLeft: "1.2rem", lineHeight: 1.8, color: "#334155", fontSize: ".95rem" },
-  helpFoot: { marginTop: ".5rem", fontSize: ".85rem", color: "#64748b" },
 }
