@@ -1,4 +1,3 @@
-import Header from '../components/Header'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import { UIContext } from '../pages/_app'
 import { GetServerSideProps } from 'next'
@@ -11,36 +10,16 @@ import OnboardingModal   from '../components/OnboardingModal'
 import UpgradeModal from '../components/UpgradeModal'
 import { useRouter } from 'next/router'
 import Footer from '../components/Footer'
+import type { HistoryItem, LikeEntry } from '../types/history'
 import Link from 'next/link'
 import { HowItWorks, TemplateQuizLite, FeatureGrid, PricingSnapshot, ROIBar, FAQList, FinalCTA } from '../components/BelowFold'
 
-
-
-type HistoryItem = {
-  keyword: string
-  category: string
-  tone: string
-  emotion: string
-  target: string
-  gender: string
-  purpose: string
-  result: string
-  likes?: { liked: boolean; tag?: string }[]
-  savedAt?: string
-  memo?: string
-}
 
 // ✅ user.plan 사용 가능하도록 타입 확장
 declare module 'next-auth' {
   interface User {
     plan?: string
   }
-}
-
-// ✅ 다크모드 반영된 containerStyle 정의 (함수 안으로 이동됨)
-export const getServerSideProps: GetServerSideProps<{ session: Session | null }> = async ctx => {
-  const session = await getSession(ctx)
-  return { props: { session } }
 }
 
 function Landing({ darkMode }: { darkMode: boolean }) {
@@ -92,7 +71,7 @@ function Landing({ darkMode }: { darkMode: boolean }) {
     >
       <button
   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg text-lg"
-  onClick={() => signIn()}
+  onClick={() => signIn(undefined, { callbackUrl: "/" })}
   aria-label="로그인하고 무료 체험하기"
 >
   로그인하고 무료 체험하기
@@ -322,85 +301,33 @@ function getFrequentTags(history: HistoryItem[]): string[] {
 }
 
 // 3️⃣ Home 컴포넌트: 로그인 전엔 Landing, 후엔 LoggedInApp (+ 탈퇴 플래시 배너)
-export default function Home({ session }: { session: Session | null }) {
-  const { data: clientSession } = useSession()
+// 3️⃣ Home 컴포넌트: 클라이언트 세션만으로 분기(SSR 세션 X)
+export default function Home() {
+  const { data: clientSession, status } = useSession()
   const router = useRouter()
-  const isLoggedIn = Boolean(session || clientSession)
   const ui = useContext(UIContext)
   const darkMode = ui?.darkMode ?? false
   const [showDeleted, setShowDeleted] = useState(false)
 
-// 1) 쿼리 감지: 최초 한 번만 실행
-  useEffect(() => {
-    if (!router.isReady) return
-
-    // ① router.query 우선
-    let shouldShow = router.query.deleted === '1'
-
-    // ② 초기 렌더에서 query가 비어 있을 수 있으니 location.search 백업 체크
-    if (!shouldShow && typeof window !== 'undefined') {
-      const sp = new URLSearchParams(window.location.search)
-      if (sp.get('deleted') === '1') shouldShow = true
-    }
-
-    if (shouldShow) {
-      setShowDeleted(true)
-       // 쿼리 정리 (배너는 showDeleted 상태로 유지)
-      const { deleted, ...rest } = router.query
-     router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true })
-    }
-   }, [router.isReady]) // ✅ deleted에 의존하지 않음
-
-   // 2) 타이머: showDeleted가 true일 때만 동작
-useEffect(() => {
-  if (!showDeleted) return
-  const timer = setTimeout(() => setShowDeleted(false), 2000)
-  return () => clearTimeout(timer)
-}, [showDeleted])
-
-  // 배너 스타일(가려짐 방지로 zIndex 크게)
-  const bannerStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 16,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 9999,
-    background: '#ecfdf5',
-    border: '1px solid #a7f3d0',
-    color: '#065f46',
-    padding: '.6rem .9rem',
-    borderRadius: 10,
-    fontSize: '.95rem',
-    boxShadow: '0 10px 24px rgba(0,0,0,0.08)',
-    pointerEvents: 'none',
+  // 세션 확인 중 깜빡임 방지 (이 단계가 “메일 링크 직후 티징 화면” 문제를 해결)
+  if (status === "loading") {
+    return (
+      <div className="landing-bg" style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+        <div style={{ opacity: 0.7, fontSize: "0.95rem" }}>로그인 상태 확인 중…</div>
+      </div>
+    )
   }
 
+  const isLoggedIn = Boolean(clientSession)
+
   if (!isLoggedIn) {
-    return (
-      <>
-        {showDeleted && (
-          <div role="status" aria-live="polite" style={bannerStyle}>
-            ✅ 계정이 깔끔하게 삭제되었어요.
-          </div>
-        )}
-        <Landing darkMode={darkMode} />
-      </>
-    )
+    return <Landing darkMode={darkMode} />
   }
 
   return (
     <div className="landing-bg">
-      {showDeleted && (
-        <div role="status" aria-live="polite" style={bannerStyle}>
-          ✅ 계정이 깔끔하게 삭제되었어요.
-        </div>
-      )}
-
       <div className="app-wrapper">
-        <LoggedInApp
-          session={(session || clientSession) as Session}
-          clientSession={clientSession}
-        />
+        <LoggedInApp session={clientSession!} clientSession={clientSession} />
         <Footer />
       </div>
     </div>
@@ -430,26 +357,6 @@ const showUpgradeModal = (message: string | React.ReactNode, title = 'Pro 전용
     onConfirm: () => router.push('/pricing'),
   });
 };
-
-interface LikeEntry {
-  liked: boolean;
-  tag?: string;
-}
-
-interface HistoryItem {
-  keyword: string;
-  category: string;
-  tone: string;
-  emotion: string;
-  target: string;
-  gender: string;
-  purpose: string;
-  result: string;
-  tags?: string[];
-  likes?: LikeEntry[];
-  savedAt?: string;
-  memo?: string;
-}
 
 const toneOptions = ['말랑한', '신뢰감', '재치있는', '고급스러운'];
 const emotionOptions = ['감성적인', '활기찬', '차분한', '발랄한'];
