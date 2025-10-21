@@ -41,6 +41,9 @@ export default function SignIn({ providers: ssrProviders, csrfToken }: Props) {
   const [cooldown, setCooldown] = useState(0)
   const [hasSent, setHasSent] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, []);
 
   const q = router.query.callbackUrl
   const callbackUrl = (Array.isArray(q) ? q[0] : q) || "/"
@@ -313,7 +316,7 @@ export default function SignIn({ providers: ssrProviders, csrfToken }: Props) {
                   ))}
 
               {/* providers 자체가 비거나 0개일 때 안내(원인 지침) */}
-              {!hasAnyProvider && (
+              {mounted && !hasAnyProvider && (
                 <div className="rounded-md" style={{ marginTop: "1rem", background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", padding: "0.75rem 1rem", fontSize: ".9rem" }}>
                   현재 환경에서 사용 가능한 로그인 방식이 없습니다.
                   <br />
